@@ -38,7 +38,7 @@ All the API methods have become public member functions of the \Postmates\Client
 ### Request Delivery Quote
 ```php
 // $oQuote is an instance of \Postmates\Dao\DeliveryQuote
-$oQuote = $this->_oClient->requestDeliveryQuote($sPickupAddress, $sDropoffAddress);
+$oQuote = $oClient->requestDeliveryQuote($sPickupAddress, $sDropoffAddress);
 
 // You may access a value from the JSON using array notation.
 // Also remember the timestamps have been converted to \DateTime instances for us.
