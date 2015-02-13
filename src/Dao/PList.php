@@ -7,9 +7,9 @@ class PList extends \Postmates\BaseDao
     {
         // Map all the children in the list
         $_aInput = [];
-        foreach($input as $_aObject)
+        foreach($input['data'] as $_aObject)
             $_aInput[] = \Postmates\Factory::create($_aObject);
 
-        return $input;
+        return $_aInput;
     }
 }

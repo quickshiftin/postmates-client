@@ -1,16 +1,19 @@
 <?php
 namespace Postmates;
 
-class Client extends GuzzleHttpClient
+class Client extends \GuzzleHttp\Client
 {
-    static private $_aStatuses = [
-        200 => 'OK: Everything went as planned.',
-        304 => 'Not Modified: Resource hasn\'t been updated since the date provided. See Caching below.',
-        400 => 'Bad Request: You did something wrong. Often a missing argument or parameter.',
-        401 => 'Unauthorized: Authentication was incorrect.',
-        404 => 'Not Found',
-        500 => 'Internal Server Error: We had a problem processing the request.',
-        503 => 'Service Unavailable: Try again later.'
+    const STATUS_PENDING         = 'pending';         // We've accepted the delivery and will be assigning it to a courier.
+    const STATUS_PICKUP          = 'pickup';          // Courier is assigned and is en route to pick up the items
+    const STATUS_PICKUP_COMPLETE = 'pickup_complete'; // Courier has picked up the items
+    const STATUS_DROPOFF         = 'dropoff';         // Courier is moving towards the dropoff
+    const STATUS_CANCELED        = 'canceled';        // Items won't be delivered. Deliveries are either canceled by the customer or by our customer service team.
+    const STATUS_DELIVERED       = 'delivered';       // Items were delivered successfully.
+    const STATUS_RETURNED        = 'returned';        // The delivery was canceled and a new job created to return items to sender. (See related_deliveries in delivery object.)
+    
+    static private $_aValidStatuses = [
+        self::STATUS_PENDING, self::STATUS_PICKUP, self::STATUS_PICKUP_COMPLETE, self::STATUS_DROPOFF,
+        self::STATUS_CANCELED, self::STATUS_DELIVERED, self::STATUS_RETURNED
     ];
 
     private $_sCustomerId;
@@ -18,15 +21,15 @@ class Client extends GuzzleHttpClient
     public function __construct(array $config=[])
     {
         // Validate Postmates config values, these are required for the Postmates Client
-        if(!isset($config['customer-id']))
+        if(!isset($config['customer_id']))
             throw new \InvalidArgumentException('Missing the Postmates Customer ID');
-        if(!isset($config['api-key']))
+        if(!isset($config['api_key']))
             throw new \InvalidArgumentException('Missing the Postmates API Key');
 
         // Optional Postmates version
         $aHeaders = [];
-        if(isset($config['postmates-version']))
-            $aHeaders = ['X-Postmates-Version' => $config['postmates-version']];
+        if(isset($config['postmates_version']))
+            $aHeaders = ['X-Postmates-Version' => $config['postmates_version']];
 
         // Store the customer id on the instance for URI generation
         $this->_sCustomerId = $config['customer_id'];
@@ -35,10 +38,10 @@ class Client extends GuzzleHttpClient
         parent::__construct(
             ['base_url' =>
             ['https://api.postmates.com/{version}/', ['version' => 'v1']],
-            'defaults' => [
-                'headers' => $aHeaders,
-                // HTTP Basic auth header, username is api key, password is blank
-                'auth'    => [$config['api_key'], ''],
+             'defaults' => [
+                 'headers' => $aHeaders,
+                 // HTTP Basic auth header, username is api key, password is blank
+                 'auth'    => [$config['api_key'], ''],
             ]]);
     }
 
@@ -54,10 +57,11 @@ class Client extends GuzzleHttpClient
      */
     public function requestDeliveryQuote($sPickupAddress, $sDropoffAddress)
     {
-        $oRq = $this->post(
-            "/customers/{$this->_sCustomerId}/delivery_quotes", [],
-            ['pickup_address' => $sPickupAddress, 'dropoff_address' => $sDropoffAddress]);
-
+        $oRq = $this->createRequest(
+            'POST',
+            "customers/{$this->_sCustomerId}/delivery_quotes",
+            ['body' =>
+            ['pickup_address' => $sPickupAddress, 'dropoff_address' => $sDropoffAddress]]);
         return $this->_request($oRq);
     }
 
@@ -72,6 +76,8 @@ class Client extends GuzzleHttpClient
         $sPickupAddress,
         $sPickupPhoneNumber,
         $sDropoffName,
+        $sDropoffAddress,
+        $sDropoffPhoneNumber,
         $sDropoffBusinessName='',
         $sManifestReference='',
         $sPickupBusinessName='',
@@ -81,11 +87,13 @@ class Client extends GuzzleHttpClient
     ) {
         // Add the required arguments
         $aRq = [
-            'manifest'            => $sManifest,
-            'pickup_name'         => $sPickupName,
-            'pickup_address'      => $sPickupAddress,
-            'pickup_phone_number' => $sPickupPhoneNumber,
-            'dropoff_name'        => $sDropoffName
+            'manifest'             => $sManifest,
+            'pickup_name'          => $sPickupName,
+            'pickup_address'       => $sPickupAddress,
+            'pickup_phone_number'  => $sPickupPhoneNumber,
+            'dropoff_name'         => $sDropoffName,
+            'dropoff_address'      => $sDropoffAddress,
+            'dropoff_phone_number' => $sDropoffPhoneNumber,
         ];
 
         // Add optional arguments
@@ -101,21 +109,27 @@ class Client extends GuzzleHttpClient
             $aRq['quote_id'] = $iQuoteId;
 
         // Configure and send the request
-        $oRq = $this->post("/customers/{$this->_sCustomerId}/deliveries", [], $aRq);
+        $oRq = $this->createRequest(
+            'POST',
+            "customers/{$this->_sCustomerId}/deliveries",
+            ['body' => $aRq ]);
+
         return $this->_request($oRq);
     }
 
     /**
-     * List all deliveries for a customer. Only ongoing deliveries are retuned by default
-     * (a feature of the PHP client). Pass false as the first argument to see all deliveries.
+     * List all deliveries for a customer optionally restricted by a provided status.
      */
-    public function listDeliveries($bOnlyOngoing=true)
-    {
+    public function listDeliveries($sStatusFilter='')
+    {        
         $aOptions = [];
-        if($bOnlyOngoing)
-            $aOptions['filter'] = 'ongoing';
+        if($sStatusFilter != '' && in_array($sStatusFilter, self::$_aValidStatuses))
+            $aOptions['filter'] = $sStatusFilter;
 
-        $oRq = $this->get("/customers/{$this->_sCustomerId}/deliveries", [], $aOptions);
+        $oRq = $this->createRequest(
+            'GET',
+            "customers/{$this->_sCustomerId}/deliveries",
+            ['query' => $aOptions]);
 
         return $this->_request($oRq);
     }
@@ -126,7 +140,7 @@ class Client extends GuzzleHttpClient
      */
     public function getDeliveryStatus($iDeliveryId)
     {
-        $oRq = $this->get("/customers/{$this->_sCustomerId}/deliveries/{$iDeliveryId}");
+        $oRq = $this->createRequest('GET', "customers/{$this->_sCustomerId}/deliveries/{$iDeliveryId}");
         return $this->_request($oRq);
     }
 
@@ -137,7 +151,7 @@ class Client extends GuzzleHttpClient
      */
     public function cancelDelivery($iDeliveryId)
     {
-        $oRq = $this->get("/customers/{$this->_sCustomerId}/deliveries/{$iDeliveryId}/cancel");
+        $oRq = $this->createRequest('POST', "customers/{$this->_sCustomerId}/deliveries/{$iDeliveryId}/cancel");
         return $this->_request($oRq);
     }
 
@@ -154,52 +168,34 @@ class Client extends GuzzleHttpClient
      */
     public function returnDelivery($iDeliveryId)
     {
-        $oRq = $this->get("/customers/{$this->_sCustomerId}/deliveries/{$iDeliveryId}/return");
+        $oRq = $this->createRequest('POST', "customers/{$this->_sCustomerId}/deliveries/{$iDeliveryId}/return");
         return $this->_request($oRq);
     }
 
     /**
      * Trap for HTTP Exceptions.
      * XXX Handling for this needs to be configurable.
+     * XXX More specific handling than just \Exception ...
      * Convert responses to JSON and return an appropriate hydrated data object.
      */
     private function _request($oRq)
     {
         try {
-            $oRsp = $oRq->send();
-            return $this->_response($oRsp->json());;
-        } catch (Guzzle\Http\Exception\BadResponseException $e) {
+            $oRsp = $this->send($oRq);
+            return Factory::create($oRsp->json());
+        } catch(\GuzzleHttp\Exception\RequestException $e) {
+            echo $e->getRequest() . "\n";
+            if($e->hasResponse()) {
+                  echo 'HTTP request URL: ' . $e->getRequest()->getUrl() . "\n";
+                  /*
+                  echo 'HTTP request: ' . $e->getRequest() . "\n";
+                  echo 'HTTP response status: ' . $e->getResponse()->getStatusCode() . "\n";
+                  echo 'HTTP response: ' . $e->getResponse() . "\n";
+                */
+                echo $e->getResponse() . "\n";
+            }
+        } catch(\Exception $e) {
             echo 'Uh oh! ' . $e->getMessage();
-            echo 'HTTP request URL: ' . $e->getRequest()->getUrl() . "\n";
-            echo 'HTTP request: ' . $e->getRequest() . "\n";
-            echo 'HTTP response status: ' . $e->getResponse()->getStatusCode() . "\n";
-            echo 'HTTP response: ' . $e->getResponse() . "\n";
-        }
-    }
-
-    /**
-     * This is a factory method that will instantiate the appropriate PHP
-     * object by inspecting the response payload.
-     */
-    private function _response($sJson)
-    {
-        $aJson = json_decode($sJson, true);
-
-        // If no type was provided return the bare array
-        if(!isset($aJson['type']))
-            return $aJson;
-
-        // Now try to hydrate a known object
-        switch($aJson['type']) {
-            case 'list':
-                return new PList($aJson);
-                break;
-            case 'delivery_quote':
-                return new DeliveryQuote($aJson);
-                break;
-            case 'delivery':
-                return new Delivery($aJson);
-                break;
         }
     }
 }

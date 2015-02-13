@@ -9,14 +9,14 @@ class Factory
      */
     static public function create(array $aJson)
     {
-        // If no type was provided return the bare array
-        if(!isset($aJson['type']))
-            return $aJson;
-
-        $sType = $aJson['type'];
+        // Seems Postmates sometimes uses the key 'object' when
+        // they pass a list kind, although the docs say it will be in kind...
+        if(isset($aJson['object']) && $aJson['object'] == 'list')
+            return new Dao\PList($aJson);
 
         // Now try to hydrate a known object
-        switch($sType) {
+        $sKind = $aJson['kind'];
+        switch($sKind) {
             case 'list':
                 return new Dao\PList($aJson);
                 break;
@@ -30,8 +30,11 @@ class Factory
                 return new Dao\Error($aJson);                
                 break;
             default;
-                throw new \UnexpectedValueException("Unsupported type $sType");
+                throw new \UnexpectedValueException("Unsupported type $sKind");
                 break;
         }
+
+        // If no type was provided return the bare array
+        return $aJson;
     }
 }

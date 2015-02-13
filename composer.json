@@ -2,7 +2,7 @@
     "name": "quickshiftin/postmates-client",
     "description": "Client library for Postmates On Demand Logistics",
     "require": {
-        "guzzle/http": "5.2.0"
+        "guzzlehttp/guzzle" : "5.2.0"
     },
     "license": "MIT",
     "authors": [
@@ -14,9 +14,6 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {
-        "php": ">=5.4.0"
-    },
     "autoload": {
         "psr-4": {
             "Postmates\\": "src/"

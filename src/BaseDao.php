@@ -25,6 +25,6 @@ class BaseDao extends \ArrayObject
      */
     static public function mapDateTime($sDate)
     {
-        return date_create($sDate, \DateTime::ISO8601);
+        return date_create($sDate);
     }
 }
