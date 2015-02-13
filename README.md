@@ -1,9 +1,29 @@
 # postmates-client
-An API client for [Postmates](https://postmates.com/developer) on demand logistics
+An API client for [Postmates](https://postmates.com/developer) on demand logistics. You can find the Postmates documentation [here](https://postmates.com/developer/docs).
 
-You can find the Postmates documentation [here](https://postmates.com/developer/docs).
+The Postmates API is RESTful and the Postmates client library extends  [`\Guzzlehttp\Client`](http://guzzle.readthedocs.org/en/latest/). You may easily incorporate the Postmates client into your project using composer.
 
-The Postmates API is RESTful, so this client library extends the [`\Guzzlehttp\Client`](http://guzzle.readthedocs.org/en/latest/).
+### Installing via Composer
+
+The recommended way to install the Postmates client is through
+[Composer](http://getcomposer.org).
+
+```bash
+# Install Composer
+curl -sS https://getcomposer.org/installer | php
+```
+
+Next, run the Composer command to install the latest stable version of postmates-client:
+
+```bash
+composer require quickshiftin/postmates-client
+```
+
+After installing, you need to require Composer's autoloader:
+
+```php
+require 'vendor/autoload.php';
+```
 
 ## Authentication
 You instantiate `\Postmates\Client` the same as you would `\Guzzlehttp\Client` except there are 2 new required configuration options and one new optional configuration option. The new required options are `customer_id` and `api_key` which you get once you [register](https://postmates.com/developer/register) your app. There's also an optional configuration option `postmates_version` which you can use to ensure consistent fields. Instantiating the client then looks like so
