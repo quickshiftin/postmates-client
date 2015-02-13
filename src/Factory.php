@@ -18,16 +18,16 @@ class Factory
         // Now try to hydrate a known object
         switch($sType) {
             case 'list':
-                return new PList($aJson);
+                return new Dao\PList($aJson);
                 break;
             case 'delivery_quote':
-                return new DeliveryQuote($aJson);
+                return new Dao\DeliveryQuote($aJson);
                 break;
             case 'delivery':
-                return new Delivery($aJson);
+                return new Dao\Delivery($aJson);
                 break;
             case 'error':
-                return new Error($aJson);                
+                return new Dao\Error($aJson);                
                 break;
             default;
                 throw new \UnexpectedValueException("Unsupported type $sType");

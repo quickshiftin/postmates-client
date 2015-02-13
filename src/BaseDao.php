@@ -3,10 +3,11 @@ namespace Postmates;
 
 class BaseDao extends \ArrayObject
 {
-    public function __construct($input=[], $flags=0, $iterator_class="ArrayIterator")
+    public function __construct($input=[], $flags=0, $iterator_class='ArrayIterator')
     {
         // Give the child a chance to map any of the values
         $mapped = $this->_map($input);
+        parent::__construct($mapped, $flags, $iterator_class);
     }
 
     /**

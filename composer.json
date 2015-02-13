@@ -4,11 +4,13 @@
     "require": {
         "guzzle/http": "5.2.0"
     },
-    "license": "GPLv3",
+    "license": "MIT",
     "authors": [
         {
             "name": "Nathan Nobbe",
-            "email": "nathan@moxune.com"
+            "email": "quickshiftin@gmail.com",
+            "homepage": "https://quickshiftin.com",
+            "role": "Developer"
         }
     ],
     "minimum-stability": "dev",
@@ -17,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Postmates": "src/"
+            "Postmates\\": "src/"
         }
     }
 }
