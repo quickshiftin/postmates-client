@@ -68,7 +68,7 @@ $oDelivereies = $oClient->listDeliveries(\Postmates\Client::STATUS_PICKUP_COMPLE
 $oDelivery = $oClient->getDeliveryStatus($sDeliveryId);
 ```
 
-=== Cancel a Delivery
+### Cancel a Delivery
 A delivery can only be canceled prior to a courier completing pickup, which means the status must be either *pending* or *pickup*.
 ```php
 $oDelivery = $oClient->cancelDelivery($iDeliveryId);
