@@ -1,4 +1,10 @@
 # postmates-client
+
+## Magento Module
+Are you reading this because you need to integrate Postmates into your Magento store? Do yourself a favor and checkout the [Postmates Shipping extension](http://www.magentocommerce.com/magento-connect/postmates-shipping-30057.html); you’ll save time and money!
+
+## Overview
+
 An API client for [Postmates](https://postmates.com/developer) on demand logistics. You can find the Postmates documentation [here](https://postmates.com/developer/docs).
 
 The Postmates API is RESTful and the Postmates client library extends  [`\Guzzlehttp\Client`](http://guzzle.readthedocs.org/en/latest/). You may easily incorporate the Postmates client into your project using composer.
