@@ -10,6 +10,9 @@ class DeliveryQuote extends \Postmates\BaseDao
         $input['expires']     = self::mapDateTime($input['expires']);
         $input['dropoff_eta'] = self::mapDateTime($input['dropoff_eta']);
 
+        // Postmates passes the fee in cents
+        $input['fee'] = $input['fee'] / 100;
+
         return $input;
     }
 }
