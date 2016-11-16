@@ -13,6 +13,7 @@ class TestClient extends PHPUnit_Framework_TestCase
         $_oClient,
         $_oQuote,
         $_oDelivery,
+        $_oDeliveryException,
         $_oDeliveries;
 
     protected function setUp()
@@ -29,6 +30,9 @@ class TestClient extends PHPUnit_Framework_TestCase
 
         // Create a delivery
         $this->_createDelivery();
+
+        // Generate a request exception
+        $this->_createDeliveryException();
     }
 
     // @TODO Test pagination ..
@@ -58,6 +62,18 @@ class TestClient extends PHPUnit_Framework_TestCase
     {
         $this->assertInstanceOf('\\Postmates\\Dao\\Delivery', $this->_oDelivery);
         $this->assertInstanceOf('\\DateTime', $this->_oDelivery['dropoff_eta']);
+    }
+
+    /**
+     * Retrieve exceptions for a failed attempt to create a delivery.
+     */
+    public function testCreateDeliveryException()
+    {
+        $this->assertNull($this->_oDeliveryException);
+        $exceptions = $this->_oClient->getRequestExceptions();
+        foreach($exceptions as $e) {
+            $this->assertInstanceOf('\\GuzzleHttp\\Exception\\RequestException', $e);
+        }
     }
 
     /**
@@ -101,6 +117,24 @@ class TestClient extends PHPUnit_Framework_TestCase
             'A bag of groceries',
             'Instamart Warehouse',
             self::WAREHOUSE_ADDRESS,
+            '800-555-1234',
+            'Roy Rogers',
+            self::CUSTOMER_ADDRESS,
+            '303-425-8803',
+            '',
+            '',
+            'Instamart Online Grocery Market',
+            'Say hi to the customer for us!',
+            $this->_oQuote['id']
+        );
+    }
+
+    private function _createDeliveryException()
+    {
+        $this->_oDeliveryException = $this->_oClient->createDelivery(
+            'A bag of groceries',
+            'Instamart Warehouse',
+            'bad_address', // this will generate an exception because Postmates cannot geocode it
             '800-555-1234',
             'Roy Rogers',
             self::CUSTOMER_ADDRESS,

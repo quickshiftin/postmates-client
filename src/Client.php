@@ -18,6 +18,8 @@ class Client extends \GuzzleHttp\Client
 
     private $_sCustomerId;
 
+    private $requestExceptions;
+
     public function __construct(array $config=[])
     {
         // Validate Postmates config values, these are required for the Postmates Client
@@ -184,18 +186,23 @@ class Client extends \GuzzleHttp\Client
             $oRsp = $this->send($oRq);
             return Factory::create($oRsp->json());
         } catch(\GuzzleHttp\Exception\RequestException $e) {
-            echo $e->getRequest() . "\n";
-            if($e->hasResponse()) {
-                  echo 'HTTP request URL: ' . $e->getRequest()->getUrl() . "\n";
-                  /*
-                  echo 'HTTP request: ' . $e->getRequest() . "\n";
-                  echo 'HTTP response status: ' . $e->getResponse()->getStatusCode() . "\n";
-                  echo 'HTTP response: ' . $e->getResponse() . "\n";
-                */
-                echo $e->getResponse() . "\n";
-            }
+            $this->addException($e);
         } catch(\Exception $e) {
-            echo 'Uh oh! ' . $e->getMessage();
+            $this->addException($e);
         }
+    }
+
+    private function addException($e) 
+    {
+        $this->requestExceptions[] = $e;
+    }
+
+    /**
+     * Retrieve an array of exceptions, if any were thrown during the request.
+     * See http://docs.guzzlephp.org/ for methods available with Guzzle request exceptions.
+     */
+    public function getRequestExceptions() 
+    {
+        return $this->requestExceptions;
     }
 }
