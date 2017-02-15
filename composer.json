@@ -1,5 +1,5 @@
 {
-    "name": "quickshiftin/postmates-client",
+    "name": "aglipanci/postmates-client",
     "description": "Client library for Postmates On Demand Logistics",
     "require": {
         "guzzlehttp/guzzle" : "5.2.0"
