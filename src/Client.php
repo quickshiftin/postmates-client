@@ -10,7 +10,7 @@ class Client extends \GuzzleHttp\Client
     const STATUS_CANCELED        = 'canceled';        // Items won't be delivered. Deliveries are either canceled by the customer or by our customer service team.
     const STATUS_DELIVERED       = 'delivered';       // Items were delivered successfully.
     const STATUS_RETURNED        = 'returned';        // The delivery was canceled and a new job created to return items to sender. (See related_deliveries in delivery object.)
-    
+
     static private $_aValidStatuses = [
         self::STATUS_PENDING, self::STATUS_PICKUP, self::STATUS_PICKUP_COMPLETE, self::STATUS_DROPOFF,
         self::STATUS_CANCELED, self::STATUS_DELIVERED, self::STATUS_RETURNED
@@ -35,14 +35,11 @@ class Client extends \GuzzleHttp\Client
         $this->_sCustomerId = $config['customer_id'];
 
         // Construct the underlying Guzzle client
-        parent::__construct(
-            ['base_url' =>
-            ['https://api.postmates.com/{version}/', ['version' => 'v1']],
-             'defaults' => [
-                 'headers' => $aHeaders,
-                 // HTTP Basic auth header, username is api key, password is blank
-                 'auth'    => [$config['api_key'], ''],
-            ]]);
+        parent::__construct([
+            'base_uri' => 'https://api.postmates.com/v1/',
+            'headers' => $aHeaders,
+            'auth'    => [$config['api_key'], ''],
+        ]);
     }
 
     /**
@@ -57,12 +54,19 @@ class Client extends \GuzzleHttp\Client
      */
     public function requestDeliveryQuote($sPickupAddress, $sDropoffAddress)
     {
-        $oRq = $this->createRequest(
-            'POST',
-            "customers/{$this->_sCustomerId}/delivery_quotes",
-            ['body' =>
-            ['pickup_address' => $sPickupAddress, 'dropoff_address' => $sDropoffAddress]]);
-        return $this->_request($oRq);
+
+        $type = 'POST';
+        $endpoint = 'customers/'. $this->_sCustomerId . '/delivery_quotes';
+        $params = [
+            'form_params' =>
+               [
+                   'pickup_address' => $sPickupAddress,
+                   'dropoff_address' => $sDropoffAddress
+               ]
+
+            ];
+
+        return $this->_request($type, $endpoint, $params);
     }
 
     /**
@@ -108,30 +112,31 @@ class Client extends \GuzzleHttp\Client
         if($iQuoteId !== null)
             $aRq['quote_id'] = $iQuoteId;
 
-        // Configure and send the request
-        $oRq = $this->createRequest(
-            'POST',
-            "customers/{$this->_sCustomerId}/deliveries",
-            ['body' => $aRq ]);
+        $type = 'POST';
+        $endpoint = 'customers/'. $this->_sCustomerId . '/deliveries';
+        $params = [
 
-        return $this->_request($oRq);
+            'form_params' => $aRq
+
+        ];
+
+        return $this->_request($type, $endpoint, $params);
     }
 
     /**
      * List all deliveries for a customer optionally restricted by a provided status.
      */
     public function listDeliveries($sStatusFilter='')
-    {        
+    {
         $aOptions = [];
         if($sStatusFilter != '' && in_array($sStatusFilter, self::$_aValidStatuses))
             $aOptions['filter'] = $sStatusFilter;
 
-        $oRq = $this->createRequest(
-            'GET',
-            "customers/{$this->_sCustomerId}/deliveries",
-            ['query' => $aOptions]);
+        $type = 'GET';
+        $endpoint = 'customers/'. $this->_sCustomerId . '/deliveries';
+        $params = ['query' => $aOptions];
 
-        return $this->_request($oRq);
+        return $this->_request($type, $endpoint, $params);
     }
 
     /**
@@ -140,8 +145,10 @@ class Client extends \GuzzleHttp\Client
      */
     public function getDeliveryStatus($iDeliveryId)
     {
-        $oRq = $this->createRequest('GET', "customers/{$this->_sCustomerId}/deliveries/{$iDeliveryId}");
-        return $this->_request($oRq);
+        $type = 'GET';
+        $endpoint = 'customers/'. $this->_sCustomerId . '/deliveries/' . $iDeliveryId;
+
+        return $this->_request( $type, $endpoint );
     }
 
     /**
@@ -151,8 +158,10 @@ class Client extends \GuzzleHttp\Client
      */
     public function cancelDelivery($iDeliveryId)
     {
-        $oRq = $this->createRequest('POST', "customers/{$this->_sCustomerId}/deliveries/{$iDeliveryId}/cancel");
-        return $this->_request($oRq);
+        $type = 'POST';
+        $endpoint = 'customers/'. $this->_sCustomerId . '/deliveries/' . $iDeliveryId . '/cancel';
+
+        return $this->_request( $type, $endpoint );
     }
 
     /**
@@ -168,8 +177,10 @@ class Client extends \GuzzleHttp\Client
      */
     public function returnDelivery($iDeliveryId)
     {
-        $oRq = $this->createRequest('POST', "customers/{$this->_sCustomerId}/deliveries/{$iDeliveryId}/return");
-        return $this->_request($oRq);
+        $type = 'POST';
+        $endpoint = 'customers/'. $this->_sCustomerId . '/deliveries/' . $iDeliveryId . '/return';
+
+        return $this->_request( $type, $endpoint );
     }
 
     /**
@@ -178,11 +189,11 @@ class Client extends \GuzzleHttp\Client
      * XXX More specific handling than just \Exception ...
      * Convert responses to JSON and return an appropriate hydrated data object.
      */
-    private function _request($oRq)
+    private function _request($type, $endpoint, $params = [])
     {
         try {
-            $oRsp = $this->send($oRq);
-            return Factory::create($oRsp->json());
+            $oRsp = $this->request( $type, $endpoint, $params );
+            return Factory::create(json_decode($oRsp->getBody(), true));
         } catch(\GuzzleHttp\Exception\RequestException $e) {
             if($e->hasResponse()) {
                 $contents = (string) $e->getResponse()->getBody();
