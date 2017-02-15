@@ -2,7 +2,7 @@
     "name": "aglipanci/postmates-client",
     "description": "Client library for Postmates On Demand Logistics",
     "require": {
-        "guzzlehttp/guzzle" : "5.2.0"
+        "guzzlehttp/guzzle": "^6.2.1",
     },
     "license": "MIT",
     "authors": [
