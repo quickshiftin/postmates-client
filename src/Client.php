@@ -184,18 +184,12 @@ class Client extends \GuzzleHttp\Client
             $oRsp = $this->send($oRq);
             return Factory::create($oRsp->json());
         } catch(\GuzzleHttp\Exception\RequestException $e) {
-            echo $e->getRequest() . "\n";
             if($e->hasResponse()) {
-                  echo 'HTTP request URL: ' . $e->getRequest()->getUrl() . "\n";
-                  /*
-                  echo 'HTTP request: ' . $e->getRequest() . "\n";
-                  echo 'HTTP response status: ' . $e->getResponse()->getStatusCode() . "\n";
-                  echo 'HTTP response: ' . $e->getResponse() . "\n";
-                */
-                echo $e->getResponse() . "\n";
+                $contents = (string) $e->getResponse()->getBody();
+                return array('status' => 'error', 'request_url' => $e->getRequest()->getUrl(), 'response_status' => $e->getResponse()->getStatusCode(), 'response' => $contents);
             }
         } catch(\Exception $e) {
-            echo 'Uh oh! ' . $e->getMessage();
+            return array('status' => 'error', 'message' => $e->getMessage());
         }
     }
 }
