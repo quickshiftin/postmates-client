@@ -107,6 +107,8 @@ class Client extends \GuzzleHttp\Client
             $aRq['pickup_business_name'] = $sPickupBusinessName;
         if(!empty($sPickupNotes))
             $aRq['pickup_notes'] = $sPickupNotes;
+        if(!empty($sDropoffNotes))
+            $aRq['dropoff_notes'] = $sDropoffNotes;
         if($iQuoteId !== null)
             $aRq['quote_id'] = $iQuoteId;
 
