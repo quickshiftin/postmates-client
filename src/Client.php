@@ -18,6 +18,8 @@ class Client extends \GuzzleHttp\Client
 
     private $_sCustomerId;
 
+    private $requestExceptions;
+
     public function __construct(array $config=[])
     {
         // Validate Postmates config values, these are required for the Postmates Client
