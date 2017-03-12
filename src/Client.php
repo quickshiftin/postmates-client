@@ -194,15 +194,25 @@ class Client extends \GuzzleHttp\Client
     private function _request($type, $endpoint, $params = [])
     {
         try {
-            $oRsp = $this->request( $type, $endpoint, $params );
-            return Factory::create(json_decode($oRsp->getBody(), true));
+            $oRsp = $this->send($oRq);
+            return Factory::create($oRsp->json());
         } catch(\GuzzleHttp\Exception\RequestException $e) {
-            if($e->hasResponse()) {
-                $contents = (string) $e->getResponse()->getBody();
-                return array('status' => 'error', 'request_url' => $e->getRequest()->getUrl(), 'response_status' => $e->getResponse()->getStatusCode(), 'response' => $contents);
-            }
+            $this->addException($e);
         } catch(\Exception $e) {
-            return array('status' => 'error', 'message' => $e->getMessage());
+            $this->addException($e);
         }
+    }
+
+    private function addException($e)
+    {
+        $this->requestExceptions[] = $e;
+    }
+    /**
+     * Retrieve an array of exceptions, if any were thrown during the request.
+     * See http://docs.guzzlephp.org/ for methods available with Guzzle request exceptions.
+     */
+    public function getRequestExceptions()
+    {
+        return $this->requestExceptions;
     }
 }
