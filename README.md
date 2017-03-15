@@ -1,7 +1,7 @@
 # postmates-client
 
 ## Magento Module
-Are you reading this because you need to integrate Postmates into your Magento store? Do yourself a favor and checkout the [Postmates Shipping extension](http://www.magentocommerce.com/magento-connect/postmates-shipping-30057.html); you’ll save time and money!
+Are you reading this because you need to integrate Postmates into your Magento store? Do yourself a favor and checkout the [Postmates Shipping extension](https://www.magentocommerce.com/magento-connect/postmates-1.html); you’ll save time and money!
 
 ## Overview
 
