@@ -65,8 +65,8 @@ class TestClient extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Retrieve exceptions for a failed attempt to create a delivery.
-     */
+    * Retrieve exceptions for a failed attempt to create a delivery.
+    */
     public function testCreateDeliveryException()
     {
         $this->assertNull($this->_oDeliveryException);
