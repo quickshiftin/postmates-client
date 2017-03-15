@@ -5,8 +5,6 @@ Are you reading this because you need to integrate Postmates into your Magento s
 
 ## Overview
 
-[![API Testing](https://img.shields.io/badge/API%20Test-RapidAPI-blue.svg)](https://rapidapi.com/package/PostmatesAPI/functions?utm_source=PostmatesGithub&utm_medium=button&utm_content=Vender_GitHub)
-
 An API client for [Postmates](https://postmates.com/developer) on demand logistics. You can find the Postmates documentation [here](https://postmates.com/developer/docs).
 
 The Postmates API is RESTful and the Postmates client library extends  [`\Guzzlehttp\Client`](http://guzzle.readthedocs.org/en/latest/). You may easily incorporate the Postmates client into your project using composer.
