@@ -16,22 +16,26 @@ class Client extends \GuzzleHttp\Client
         self::STATUS_CANCELED, self::STATUS_DELIVERED, self::STATUS_RETURNED
     ];
 
-    private $_sCustomerId;
-
-    private $requestExceptions;
+    private
+        $_sCustomerId,
+        $requestExceptions;
 
     public function __construct(array $config=[])
     {
         // Validate Postmates config values, these are required for the Postmates Client
-        if(!isset($config['customer_id']))
+        if(!isset($config['customer_id'])) {
             throw new \InvalidArgumentException('Missing the Postmates Customer ID');
-        if(!isset($config['api_key']))
+        }
+
+        if(!isset($config['api_key'])) {
             throw new \InvalidArgumentException('Missing the Postmates API Key');
+        }
 
         // Optional Postmates version
         $aHeaders = [];
-        if(isset($config['postmates_version']))
+        if(isset($config['postmates_version'])) {
             $aHeaders = ['X-Postmates-Version' => $config['postmates_version']];
+        }
 
         // Store the customer id on the instance for URI generation
         $this->_sCustomerId = $config['customer_id'];
@@ -39,8 +43,8 @@ class Client extends \GuzzleHttp\Client
         // Construct the underlying Guzzle client
         parent::__construct([
             'base_uri' => 'https://api.postmates.com/v1/',
-            'headers' => $aHeaders,
-            'auth'    => [$config['api_key'], ''],
+            'headers'  => $aHeaders,
+            'auth'     => [$config['api_key'], ''],
         ]);
     }
 
@@ -56,16 +60,13 @@ class Client extends \GuzzleHttp\Client
      */
     public function requestDeliveryQuote($sPickupAddress, $sDropoffAddress)
     {
-
-        $type = 'POST';
-        $endpoint = 'customers/'. $this->_sCustomerId . '/delivery_quotes';
-        $params = [
-            'form_params' =>
-               [
-                   'pickup_address' => $sPickupAddress,
+        $type     = 'POST';
+        $endpoint = 'customers/' . $this->_sCustomerId . '/delivery_quotes';
+        $params   = [
+            'form_params' => [
+                   'pickup_address'  => $sPickupAddress,
                    'dropoff_address' => $sDropoffAddress
                ]
-
             ];
 
         return $this->_request($type, $endpoint, $params);
@@ -103,25 +104,34 @@ class Client extends \GuzzleHttp\Client
         ];
 
         // Add optional arguments
-        if(!empty($sDropffBusinessName))
+        if(!empty($sDropffBusinessName)) {
             $aRq['dropoff_business_name'] = $sDropoffBusinessName;
-        if(!empty($sManifestReference))
+        }
+
+        if(!empty($sManifestReference)) {
             $aRq['manifest_reference'] = $sManifestReference;
-        if(!empty($sPickupBusinessName))
+        }
+
+        if(!empty($sPickupBusinessName)) {
             $aRq['pickup_business_name'] = $sPickupBusinessName;
-        if(!empty($sPickupNotes))
+        }
+
+        if(!empty($sPickupNotes)) {
             $aRq['pickup_notes'] = $sPickupNotes;
-        if(!empty($sDropoffNotes))
+        }
+
+        if(!empty($sDropoffNotes)) {
             $aRq['dropoff_notes'] = $sDropoffNotes;
-        if($iQuoteId !== null)
+        }
+
+        if($iQuoteId !== null) {
             $aRq['quote_id'] = $iQuoteId;
+        }
 
-        $type = 'POST';
+        $type     = 'POST';
         $endpoint = 'customers/'. $this->_sCustomerId . '/deliveries';
-        $params = [
-
+        $params   = [
             'form_params' => $aRq
-
         ];
 
         return $this->_request($type, $endpoint, $params);
@@ -133,12 +143,13 @@ class Client extends \GuzzleHttp\Client
     public function listDeliveries($sStatusFilter='')
     {
         $aOptions = [];
-        if($sStatusFilter != '' && in_array($sStatusFilter, self::$_aValidStatuses))
+        if($sStatusFilter != '' && in_array($sStatusFilter, self::$_aValidStatuses)) {
             $aOptions['filter'] = $sStatusFilter;
+        }
 
-        $type = 'GET';
+        $type     = 'GET';
         $endpoint = 'customers/'. $this->_sCustomerId . '/deliveries';
-        $params = ['query' => $aOptions];
+        $params   = ['query' => $aOptions];
 
         return $this->_request($type, $endpoint, $params);
     }
@@ -149,10 +160,10 @@ class Client extends \GuzzleHttp\Client
      */
     public function getDeliveryStatus($iDeliveryId)
     {
-        $type = 'GET';
-        $endpoint = 'customers/'. $this->_sCustomerId . '/deliveries/' . $iDeliveryId;
+        $type     = 'GET';
+        $endpoint = 'customers/' . $this->_sCustomerId . '/deliveries/' . $iDeliveryId;
 
-        return $this->_request( $type, $endpoint );
+        return $this->_request($type, $endpoint);
     }
 
     /**
@@ -162,10 +173,10 @@ class Client extends \GuzzleHttp\Client
      */
     public function cancelDelivery($iDeliveryId)
     {
-        $type = 'POST';
-        $endpoint = 'customers/'. $this->_sCustomerId . '/deliveries/' . $iDeliveryId . '/cancel';
+        $type     = 'POST';
+        $endpoint = 'customers/' . $this->_sCustomerId . '/deliveries/' . $iDeliveryId . '/cancel';
 
-        return $this->_request( $type, $endpoint );
+        return $this->_request($type, $endpoint);
     }
 
     /**
@@ -181,10 +192,10 @@ class Client extends \GuzzleHttp\Client
      */
     public function returnDelivery($iDeliveryId)
     {
-        $type = 'POST';
+        $type     = 'POST';
         $endpoint = 'customers/'. $this->_sCustomerId . '/deliveries/' . $iDeliveryId . '/return';
 
-        return $this->_request( $type, $endpoint );
+        return $this->_request($type, $endpoint);
     }
 
     /**
@@ -209,6 +220,7 @@ class Client extends \GuzzleHttp\Client
     {
         $this->requestExceptions[] = $e;
     }
+
     /**
      * Retrieve an array of exceptions, if any were thrown during the request.
      * See http://docs.guzzlephp.org/ for methods available with Guzzle request exceptions.

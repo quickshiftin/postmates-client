@@ -1,5 +1,5 @@
 <?php
-use \Postmates\Client;
+use Postmates\Client;
 
 class TestClient extends PHPUnit_Framework_TestCase
 {
