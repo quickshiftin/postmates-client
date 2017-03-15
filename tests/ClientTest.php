@@ -108,7 +108,7 @@ class TestClient extends PHPUnit_Framework_TestCase
         $oDelivery        = $oDeliveries[0];
         $oReverseDelivery = $this->_oClient->returnDelivery($oDelivery['id']);
 
-        $this->assertEquals($oDelivery['pickup']['address'], $oReversedDelivery['dropoff']['address']);
+        $this->assertEquals($oDelivery['pickup']['address'], $oReverseDelivery['dropoff']['address']);
     }
 
     private function _createDelivery()
