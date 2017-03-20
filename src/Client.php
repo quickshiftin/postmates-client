@@ -207,7 +207,9 @@ class Client extends \GuzzleHttp\Client
     private function _request($type, $endpoint, $params = [])
     {
         try {
+            $oRq = $this->request($type, $endpoint, $params);
             $oRsp = $this->send($oRq);
+
             return Factory::create($oRsp->json());
         } catch(\GuzzleHttp\Exception\RequestException $e) {
             $this->addException($e);
