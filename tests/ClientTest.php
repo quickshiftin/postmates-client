@@ -3,8 +3,8 @@ use Postmates\Client;
 
 class TestClient extends PHPUnit_Framework_TestCase
 {
-    const CUST_ID = 'cus_KCnit0JT3Pe6ak';
-    const API_KEY = '0dbfacdb-10bd-4813-8042-c4f1bf3811a1';
+    const CUST_ID = 'cus_xxxxxxxxxxxxxx';
+    const API_KEY = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
 
     const WAREHOUSE_ADDRESS = '9601 E Iliff Ave Denver, CO 80231';
     const CUSTOMER_ADDRESS  = '2200 Market St, Denver, CO 80205';
